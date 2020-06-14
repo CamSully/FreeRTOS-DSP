@@ -1,0 +1,29 @@
+mpu_wrappers.pbi: \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Source\portable\Common\mpu_wrappers.c \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include\FreeRTOS.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\stddef.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\ycheck.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\yvals.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\DLib_Defaults.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\DLib_Config_Full.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\DLib_Product.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\ysizet.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\stdint.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../Config\FreeRTOSConfig.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include/projdefs.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include/portable.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include/deprecated_definitions.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/portable/IAR/ARM_CM4F_MPU\portmacro.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\intrinsics.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\iccarm_builtin.h \
+  C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.4\arm\inc\c\iar_intrinsics_common.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include/mpu_wrappers.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include\task.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include/list.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include\queue.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include/task.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include\timers.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include\event_groups.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include/timers.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include\stream_buffer.h \
+  C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\Projects\IAR/../../../../Source/include\mpu_prototypes.h
