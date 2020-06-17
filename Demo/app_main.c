@@ -33,46 +33,90 @@
 /* App includes. */
 #include "app_main.h"
 
-/* Demo includes. */
-#include "mpu_demo.h"
+// CWS FUNCTION BEGIN
+void light_red_led(void *p) 
+{
+  while(1) {
+    // Suspend green LED task.
+    TaskHandle_t green_handle = (TaskHandle_t)p;
+    vTaskSuspend(green_handle);
+    
+    // Turn on red LED.
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+    
+    // Delay 1 second.
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    
+    // Turn off red LED.
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
+    
+    // Resume green LED task.
+    vTaskResume(green_handle);
+    
+    vTaskDelay(pdMS_TO_TICKS(50));
+  }
+}
+// CWS FUNCTION END
 
 // CWS FUNCTION BEGIN
-void cam_task(void *p) 
+void light_green_led(void *p) 
 {
-  
-  GPIO_InitTypeDef GPIO_InitStruct;
-  
-  __GPIOB_CLK_ENABLE();
-  
-  GPIO_InitStruct.Pin = GPIO_PIN_2;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
-  
   while(1) {
+    // Suspend red LED task.
+    TaskHandle_t red_handle = (TaskHandle_t)p;
+    vTaskSuspend(red_handle);
     
-    // vTaskDelay(1000);
+    // Turn on green LED.
+    HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET);
+    
+    // Delay 1 second.
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    
+    // Turn off green LED.
+    HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);
+    
+    // Resume red LED task.
+    vTaskResume(red_handle);
+    
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
 // CWS FUNCTION END
    
+
+
 void app_main( void )
 {
-	/* Start the MPU demo. */
-	vStartMPUDemo();
+  
+        GPIO_InitTypeDef GPIO_InitStruct;
+        __GPIOB_CLK_ENABLE();
+        __GPIOE_CLK_ENABLE();
+  
+        GPIO_InitStruct.Pin = GPIO_PIN_2;
+        GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+        GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+        
+        GPIO_InitStruct.Pin = GPIO_PIN_8;
+        GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+        GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+        HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+        
 
+        TaskHandle_t red_handle = NULL;
+        TaskHandle_t green_handle = NULL;
+  
         // CWS - create task here.
         /* Params:
-            - Pointer to entry function
+            - Pointer to entry function (function name).
             - Name for task
             - Stack depth (num words)
             - Task param
             - Task priority
             - Handle (optional, can be NULL).
         */
-        xTaskCreate(cam_task,"cam_task", 1024, NULL, 1, NULL);
+        xTaskCreate(light_red_led, "red_led", 1024, green_handle, 1, &red_handle);
+        xTaskCreate(light_green_led, "green_led", 1024, red_handle, 1, &green_handle);
         
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -81,6 +125,14 @@ void app_main( void )
 	for( ;; );
 }
 /*-----------------------------------------------------------*/
+
+
+
+// CWS - had to add this because it was originally defined in mpu_demo.c.
+void vHandleMemoryFault(void)
+{
+  while(1);
+}
 
 void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 {
