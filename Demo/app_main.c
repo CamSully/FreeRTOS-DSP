@@ -33,14 +33,14 @@
 /* App includes. */
 #include "app_main.h"
 
+void light_green_led(void*);
+void light_red_led(void*);
+
+
+
 // CWS FUNCTION BEGIN
 void light_red_led(void *p) 
-{
-  while(1) {
-    // Suspend green LED task.
-    TaskHandle_t green_handle = (TaskHandle_t)p;
-    vTaskSuspend(green_handle);
-    
+{    
     // Turn on red LED.
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
     
@@ -50,22 +50,18 @@ void light_red_led(void *p)
     // Turn off red LED.
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
     
-    // Resume green LED task.
-    vTaskResume(green_handle);
+    xTaskCreate(light_green_led, "green_led", 1024, NULL, 1, NULL);
+    vTaskDelete(NULL);
     
-    vTaskDelay(pdMS_TO_TICKS(50));
-  }
+    while(1);
 }
 // CWS FUNCTION END
 
+
+
 // CWS FUNCTION BEGIN
 void light_green_led(void *p) 
-{
-  while(1) {
-    // Suspend red LED task.
-    TaskHandle_t red_handle = (TaskHandle_t)p;
-    vTaskSuspend(red_handle);
-    
+{  
     // Turn on green LED.
     HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET);
     
@@ -75,19 +71,18 @@ void light_green_led(void *p)
     // Turn off green LED.
     HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);
     
-    // Resume red LED task.
-    vTaskResume(red_handle);
+    xTaskCreate(light_red_led, "red_led", 1024, NULL, 1, NULL);
+    vTaskDelete(NULL);
     
-    vTaskDelay(pdMS_TO_TICKS(50));
-  }
+    while(1);
 }
 // CWS FUNCTION END
-   
+
 
 
 void app_main( void )
 {
-  
+          // Initialize green and red LEDs.
         GPIO_InitTypeDef GPIO_InitStruct;
         __GPIOB_CLK_ENABLE();
         __GPIOE_CLK_ENABLE();
@@ -101,10 +96,7 @@ void app_main( void )
         GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
         GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
         HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-        
-
-        TaskHandle_t red_handle = NULL;
-        TaskHandle_t green_handle = NULL;
+                
   
         // CWS - create task here.
         /* Params:
@@ -115,8 +107,11 @@ void app_main( void )
             - Task priority
             - Handle (optional, can be NULL).
         */
-        xTaskCreate(light_red_led, "red_led", 1024, green_handle, 1, &red_handle);
-        xTaskCreate(light_green_led, "green_led", 1024, red_handle, 1, &green_handle);
+        
+        TaskHandle_t red_handle = NULL;
+        
+        xTaskCreate(light_red_led, "red_led", 1024, NULL, 1, &red_handle);
+        // xTaskCreate(light_green_led, "green_led", 1024, NULL, 1, &green_handle);
         
 	/* Start the scheduler. */
 	vTaskStartScheduler();
