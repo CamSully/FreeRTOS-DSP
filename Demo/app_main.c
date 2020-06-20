@@ -33,6 +33,7 @@
 /* App includes. */
 #include "app_main.h"
 
+void TIM4_Config(void);
 void light_green_led(void*);
 void light_red_led(void*);
 
@@ -82,7 +83,7 @@ void light_green_led(void *p)
 
 void app_main( void )
 {
-          // Initialize green and red LEDs.
+        // Initialize green and red LEDs.
         GPIO_InitTypeDef GPIO_InitStruct;
         __GPIOB_CLK_ENABLE();
         __GPIOE_CLK_ENABLE();
@@ -97,7 +98,10 @@ void app_main( void )
         GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
         HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
                 
-  
+        // DSP Init
+        TIM4_Config();
+
+        
         // CWS - create task here.
         /* Params:
             - Pointer to entry function (function name).
@@ -120,6 +124,34 @@ void app_main( void )
 	for( ;; );
 }
 /*-----------------------------------------------------------*/
+
+// CWS - from init486.c
+static void TIM4_Config(void)
+{
+        int fs = 1667;       // 48 Ksps
+        static TIM_HandleTypeDef htim;
+        TIM_MasterConfigTypeDef  sMasterConfig;
+          
+        htim.Instance = TIM4;
+          
+        /* Number of timer counts per ADC sample....  The timer 4 clock frequency is
+        * the APB1 Bus frequency: 80 MHz.  For example, To get 50 ksps, we're
+        * counting (50 MHz)/(50 ksps) = 1600 counts
+        */
+        htim.Init.Period = fs;
+        htim.Init.Prescaler = 0;
+        htim.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+        htim.Init.CounterMode = TIM_COUNTERMODE_UP;
+        HAL_TIM_Base_Init(&htim);
+        
+        sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+        sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+         
+        HAL_TIMEx_MasterConfigSynchronization(&htim, &sMasterConfig);
+          
+        /*##-2- Enable TIM peripheral counter ######################################*/
+        HAL_TIM_Base_Start(&htim);
+}
 
 
 
