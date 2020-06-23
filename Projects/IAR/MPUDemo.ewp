@@ -360,6 +360,7 @@
                     <state>$PROJ_DIR$/../../../../Source/include</state>
                     <state>$PROJ_DIR$/../../../../Source/portable/IAR/ARM_CM4F_MPU</state>
                     <state>$PROJ_DIR$/../../../../Source/portable/IAR/ARM_CM4F_MPU</state>
+                    <state>C:\Users\CamSully\Downloads\FreeRTOSv10.3.1\FreeRTOS\Demo\CORTEX_MPU_STM32L4_Discovery_GCC_IAR_Keil\ST_Code\Drivers\ece486</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>

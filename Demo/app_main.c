@@ -28,12 +28,14 @@
 #include <stdio.h>
 #include "FreeRTOS.h"
 #include "task.h"
-#include "stm32l4xx_hal.h"
 
 /* App includes. */
 #include "app_main.h"
+#include "stm32l4xx_hal.h"
+#include "init486_def.h"
 
-void TIM4_Config(void);
+void TIM4_Config(uint16_t);
+static void init_dac(uint16_t, enum Num_Channels_Out);
 void light_green_led(void*);
 void light_red_led(void*);
 
@@ -80,6 +82,9 @@ void light_green_led(void *p)
 // CWS FUNCTION END
 
 
+static DAC_HandleTypeDef DacHandle;
+enum Num_Channels_Out Output_Configuration;
+enum Num_Channels_In Input_Configuration;
 
 void app_main( void )
 {
@@ -99,7 +104,9 @@ void app_main( void )
         HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
                 
         // DSP Init
-        TIM4_Config();
+        uint16_t fs = 1667;      // 48 ksps == 1667.
+        TIM4_Config(fs);
+        init_dac(fs, STEREO_OUT);
 
         
         // CWS - create task here.
@@ -126,9 +133,8 @@ void app_main( void )
 /*-----------------------------------------------------------*/
 
 // CWS - from init486.c
-static void TIM4_Config(void)
+static void TIM4_Config(uint16_t fs)
 {
-        int fs = 1667;       // 48 Ksps
         static TIM_HandleTypeDef htim;
         TIM_MasterConfigTypeDef  sMasterConfig;
           
@@ -152,6 +158,68 @@ static void TIM4_Config(void)
         /*##-2- Enable TIM peripheral counter ######################################*/
         HAL_TIM_Base_Start(&htim);
 }
+
+
+// CWS - from init486.c
+static void init_dac(uint16_t fs, enum Num_Channels_Out chanout) {
+  static DAC_ChannelConfTypeDef DacConfig;
+
+  DacHandle.Instance = DAC;
+
+  /*
+   * DAC Channel 2...  Trigger with Timer 4 TRG0 Event
+   * Note that HAL_DAC_Init() calls HAL_DAC_MspInit() (The MPU-specific initialization
+   * routine).  This function must be re-defined  below in order to associate
+   * the correct DMA stream with the DAC.  Similarly, HAL_DAC_DeInit() calls
+   * HAL_DAC_MspDeInit()... which we're on the hook to define.
+   */
+  if(HAL_DAC_Init(&DacHandle) != HAL_OK)  flagerror(DAC_CONFIG_ERROR);
+
+  DacConfig.DAC_Trigger = DAC_TRIGGER_T4_TRGO;
+  DacConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;  // Output Buffer Amp
+  DacConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
+  DacConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
+  DacConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
+
+  if (chanout == MONO_OUT) {
+    if(HAL_DAC_ConfigChannel(&DacHandle, &DacConfig, DAC_CHANNEL_2) != HAL_OK)
+      flagerror(DAC_CONFIG_ERROR);
+
+    if( HAL_DAC_Start_DMA(&DacHandle,
+                          DAC_CHANNEL_2,
+                          (uint32_t *)DAC_Output_Buffer,
+                          ADC_Buffer_Size,
+                          DAC_ALIGN_12B_L)
+        != HAL_OK) flagerror(DAC_CONFIG_ERROR);
+
+  } else if (chanout == STEREO_OUT) {
+
+   // DAC Channel 2 is the same as the Mono case... Channel 2 drives PA5 directly
+   if(HAL_DAC_ConfigChannel(&DacHandle, &DacConfig, DAC_CHANNEL_2) != HAL_OK)
+     flagerror(DAC_CONFIG_ERROR);
+
+   // DAC Channel 1 is directed to opamp1, which can drive PA3
+   // (This is because PA4 is not extended to the connector on the discovery board,
+   //  and PA3 is extended.  The opamp is used to get the dac stignal to PA3.)
+   opamp_init();
+   DacConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_ENABLE;
+   if(HAL_DAC_ConfigChannel(&DacHandle, &DacConfig, DAC_CHANNEL_1) != HAL_OK)
+     flagerror(DAC_CONFIG_ERROR);
+
+    /*
+    * To start the DAC in dual-sample mode, use a hacked up version of
+    * HAL_DAC_Start_DMA()...  The HAL library does not seem to support the
+    * dual mode very well!
+    */
+   if( Hacked_HAL_DAC_DualStart_DMA(&DacHandle,
+                          (uint32_t *)DAC_Output_Buffer,
+                          ADC_Buffer_Size)
+        != HAL_OK) flagerror(DAC_CONFIG_ERROR);
+ } else {
+   flagerror(DAC_CONFIG_ERROR);
+  }
+}
+
 
 
 
