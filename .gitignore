@@ -1,2 +1,6 @@
-Projects/IAR/Debug/
-ST_Code/Drivers/
+Debug/
+Startup/
+
+*.ioc
+*.ld
+*.swp
