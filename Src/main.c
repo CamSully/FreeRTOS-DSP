@@ -25,7 +25,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdlib.h>
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -98,6 +99,59 @@ void StartDefaultTask(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+enum Processor_Task {
+	STARTUP,
+	PROCESS_BUFFER,
+	WAIT_FOR_NEXT_BUFFER
+};
+enum Processor_Task volatile Sampler_Status;
+volatile int Lower_Ready = 0;
+static volatile uint32_t *inbuf;
+static volatile uint32_t *outbuf;
+volatile uint32_t *ADC_Input_Buffer = NULL;
+volatile uint32_t *DAC_Output_Buffer = NULL;
+uint32_t ADC_Block_Size = 100;
+arm_fir_instance_f32 *s;
+
+void getBlock(void *p)
+{
+	uint32_t i;
+	float *input = (float *)p;
+
+	// Wait for DMA to fill a block of data.
+	Sampler_Status = WAIT_FOR_NEXT_BUFFER;
+	while (Sampler_Status == WAIT_FOR_NEXT_BUFFER) __WFI();
+
+	// Fill either lower or upper half of DMA block.
+	if (Lower_Ready) {
+		inbuf = ADC_Input_Buffer;
+		outbuf = DAC_Output_Buffer;
+	} else {
+		inbuf = &(ADC_Input_Buffer[ADC_Block_Size]);
+		outbuf = &(DAC_Output_Buffer[ADC_Block_Size]);
+	}
+
+	// Normalize ADC values from -1 to 1.
+	for (i = 0; i < ADC_Block_Size; i++) {
+		input[i] = ((float)((int)inbuf[i]-32767))*3.0517578e-05f;
+	}
+}
+
+void calc_fir(void *p)
+{
+	float *input = (float *)p;
+
+	// Can't pass two params to the task, so use same input and output. Need to verify that this can be done in ARM docs.
+	arm_fir_f32(s, input, input, 100);
+}
+
+void putBlock(void *p)
+{
+	//float *input = (float *)p;
+
+	// DAC code here.
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -141,6 +195,17 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  // Initialize FIR filter.
+  s = malloc(sizeof(arm_fir_instance_f32));
+  int n_coef = 20;
+  float fir_coefs[20] = {0.0019,0.0028,-0.0053,-0.01,0.0174,0.0288,-0.0465,-0.0764,0.1413,0.4459,0.4459,0.1413,-0.0764,-0.0465,0.0288,0.0174,-0.01,-0.0053,0.0028,0.0019};
+  int blocksize = 100;
+  float *pState = calloc(n_coef+blocksize-1, sizeof(float));
+  arm_fir_init_f32(s, n_coef, fir_coefs, pState, 100);
+
+  float *input = (float *)malloc(sizeof(float)*blocksize);
+  //float *output = (float *)malloc(sizeof(float)*blocksize);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -168,6 +233,9 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+
+  osThreadNew(getBlock, input, &defaultTask_attributes);
+
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
