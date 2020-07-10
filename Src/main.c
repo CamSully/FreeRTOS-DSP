@@ -93,7 +93,9 @@ static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+void getBlock(void*);
+void calc_fir(void*);
+void putBlock(void*);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -135,6 +137,14 @@ void getBlock(void *p)
 	for (i = 0; i < ADC_Block_Size; i++) {
 		input[i] = ((float)((int)inbuf[i]-32767))*3.0517578e-05f;
 	}
+
+	// Create calculation task
+	osThreadNew(calc_fir, input, &defaultTask_attributes);
+
+	// End this task
+	osThreadExit();
+
+	while(1);
 }
 
 void calc_fir(void *p)
@@ -143,13 +153,32 @@ void calc_fir(void *p)
 
 	// Can't pass two params to the task, so use same input and output. Need to verify that this can be done in ARM docs.
 	arm_fir_f32(s, input, input, 100);
+
+	// Create DAC output task
+	osThreadNew(putBlock, input, &defaultTask_attributes);
+
+	// End this task
+	osThreadExit();
+
+	while(1);
 }
 
 void putBlock(void *p)
 {
-	//float *input = (float *)p;
+	uint32_t i;
+	float *input = (float *)p;
 
-	// DAC code here.
+	for (i = 0; i < ADC_Block_Size; i++) {
+		outbuf[i] = ((int)((input[i]+1.0)*32768.0f)) & 0x0000ffff;
+	}
+
+	// Create DAC output task
+	osThreadNew(getBlock, input, &defaultTask_attributes);
+
+	// End this task
+	osThreadExit();
+
+	while(1);
 }
 
 /* USER CODE END 0 */
