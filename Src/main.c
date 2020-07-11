@@ -977,7 +977,33 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+	Lower_Ready = 0;
 
+	if (Sampler_Status == STARTUP) {}
+
+	else if (Sampler_Status == WAIT_FOR_NEXT_BUFFER) {
+		Sampler_Status = PROCESS_BUFFER;
+	}
+	else {
+		Error_Handler();
+	}
+}
+
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc)
+{
+	Lower_Ready = 1;
+
+	if (Sampler_Status == STARTUP) {}
+
+	else if (Sampler_Status == WAIT_FOR_NEXT_BUFFER) {
+		Sampler_Status = PROCESS_BUFFER;
+	}
+	else {
+		Error_Handler();
+	}
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
